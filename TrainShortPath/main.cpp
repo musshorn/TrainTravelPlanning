@@ -30,9 +30,9 @@ string station_line[total_stations];
 string enames[total_stations][max_change];
 string elines[total_stations][max_change];
 int weights[total_stations][max_change];
-
-
-
+bool visited[total_stations];
+int length[total_stations];
+int predecessor[total_stations];
 
 void initialize()
 {
@@ -93,43 +93,51 @@ void initialize()
 		}
 	}
 }
-void dijkstra(int start_i,int end_i)
-{
-	bool visited[total_stations];
-	int distance[total_stations];
-	int predecessor[total_stations];
-	int current = start_i;
-	int count=0;
 
-	cout<<start_i<<" "<<end_i<<endl;
+int getunmarked()
+{
+	int smalllength =	bigint;
+	int closeunmark;
+
+		for (int i = 0; i<total_stations; i++)
+		{
+			if(!visited[i] && smalllength >= length[i])
+			{
+				smalllength = length[i];
+				closeunmark = i;
+			}
+		}
+	
+	return closeunmark;
+}
+
+void dijkstra(int start_node)
+{
+	int count=0;
 
 	for (int i=0;i<total_stations;i++)
 	{
 		visited[i] = false;
-		distance[i] = bigint;
+		length[i] = bigint;
 		predecessor[i] = 0;
 	}
-	distance[start_i] = 0;
-	visited[start_i] = true;
 
-	int dist = distance[current];
-	int smalldist =	bigint;
-	int closeunmark;
-	while(count<total_stations)
-	{
-		for (int i = 0; i<total_stations; i++)
-		{
-			if(!visited[i] && smalldist >= distance[i])
-			{
-				smalldist = distance[i];
-				closeunmark = i;
+	length[start_node] = 0;
+	visited[start_node] = true;
+
+	while(count<total_stations) {
+		int closeunmark = getunmarked();
+		visited[closeunmark] = true;
+		for(int i=0;i<total_stations;i++) {
+			if(!visited[i] && edge_matrix[closeunmark][i]) {
+				if(length[i] > length[closeunmark] + edge_matrix[closeunmark][i]) {
+					length[i] = length[closeunmark] + edge_matrix[closeunmark][i];
+					predecessor[i] = closeunmark;
+				}
 			}
 		}
-		for (int i = 0; i<total_stations; i++)
-		{
-			visited[closeunmark] = true;
-
-		}
+	count++;
+		
 	}
 
 
@@ -138,7 +146,7 @@ void dijkstra(int start_i,int end_i)
 	//	cout<<station_names[predecessor[i]] << " -> " << station_names[predecessor[i-1]] <<endl;
 	for (int i=0;i<total_stations;i++)
 	{
-		cout<<station_names[predecessor[i]] <<"\t" << distance[i]<< endl;
+		cout<<station_names[predecessor[i]] <<"\t" << length[i]<< endl;
 	}
 
 	//cin.get();
@@ -150,8 +158,8 @@ int main()
 	//Get user data, Validate.
 	string start_station;
 	string end_station;
-	int start_i;
-	int end_i;
+	int start_node;
+
 	cout << "Enter the name of the starting station: ";
 	//cin >> start_station;
 	start_station = "Homebush";
@@ -166,12 +174,11 @@ int main()
 		if(start_station == station_names[i])
 		{
 			start_exists = true;
-			start_i = i;
+			start_node= i;
 		}
 		else if(end_station == station_names[i])
 		{
 			end_exists = true;
-			end_i = i;
 		}
 	}
 	if(start_exists)
@@ -179,7 +186,7 @@ int main()
 		if(end_exists)
 		{
 			cout<<"Stations found. Begining algorithim"<<endl;
-			dijkstra(start_i,end_i);
+			dijkstra(start_node);
 		}
 		else
 		{
