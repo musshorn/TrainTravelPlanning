@@ -96,17 +96,17 @@ void initialize()
 
 int getunmarked()
 {
-	int smalllength =	bigint;
+	int smalllength = bigint;
 	int closeunmark;
 
-		for (int i = 0; i<total_stations; i++)
+	for (int i = 0; i<total_stations; i++)
+	{
+		if(!visited[i] && smalllength >= length[i])
 		{
-			if(!visited[i] && smalllength >= length[i])
-			{
-				smalllength = length[i];
-				closeunmark = i;
-			}
+			smalllength = length[i];
+			closeunmark = i;
 		}
+	}
 	
 	return closeunmark;
 }
@@ -119,18 +119,20 @@ void dijkstra(int start_node)
 	{
 		visited[i] = false;
 		length[i] = bigint;
-		predecessor[i] = 0;
+		predecessor[i] = -1;
 	}
 
 	length[start_node] = 0;
-	visited[start_node] = true;
 
 	while(count<total_stations) {
 		int closeunmark = getunmarked();
 		visited[closeunmark] = true;
-		for(int i=0;i<total_stations;i++) {
-			if(!visited[i] && edge_matrix[closeunmark][i]) {
-				if(length[i] > length[closeunmark] + edge_matrix[closeunmark][i]) {
+		for(int i=0;i<total_stations;i++) 
+		{
+			if(!visited[i] && edge_matrix[closeunmark][i]) 
+			{
+				if(length[i] > (length[closeunmark] + edge_matrix[closeunmark][i])) 
+				{
 					length[i] = length[closeunmark] + edge_matrix[closeunmark][i];
 					predecessor[i] = closeunmark;
 				}
@@ -139,18 +141,20 @@ void dijkstra(int start_node)
 	count++;
 		
 	}
-
-
-	cout<<"The shortest path is: "<<endl;
-	//for (int i=1;i<5;i++)
-	//	cout<<station_names[predecessor[i]] << " -> " << station_names[predecessor[i-1]] <<endl;
 	for (int i=0;i<total_stations;i++)
-	{
-		cout<<station_names[predecessor[i]] <<"\t" << length[i]<< endl;
-	}
-
-	//cin.get();
+		cout<<station_names[predecessor[i]]<<endl;
 }
+void printPath(int end_node,int start_node)
+{
+	if(start_node == end_node)
+		cout<<end_node;
+	else if(predecessor[end_node] = -1)
+		cout<< "No path exists";
+	else
+		printPath(end_node,start_node);
+		cout<<station_names[end_node]<<"->";
+}
+
 int main()
 {
 	initialize();
@@ -159,7 +163,7 @@ int main()
 	string start_station;
 	string end_station;
 	int start_node;
-
+	int end_node;
 	cout << "Enter the name of the starting station: ";
 	//cin >> start_station;
 	start_station = "Homebush";
@@ -174,11 +178,12 @@ int main()
 		if(start_station == station_names[i])
 		{
 			start_exists = true;
-			start_node= i;
+			start_node = i;
 		}
 		else if(end_station == station_names[i])
 		{
 			end_exists = true;
+			end_node = i;
 		}
 	}
 	if(start_exists)
@@ -187,6 +192,7 @@ int main()
 		{
 			cout<<"Stations found. Begining algorithim"<<endl;
 			dijkstra(start_node);
+			printPath(end_node,start_node);
 		}
 		else
 		{
