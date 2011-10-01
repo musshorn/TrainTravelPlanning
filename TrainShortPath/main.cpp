@@ -123,7 +123,6 @@ void dijkstra(int start_node)
 	}
 
 	length[start_node] = 0;
-
 	while(count<total_stations) {
 		int closeunmark = getunmarked();
 		visited[closeunmark] = true;
@@ -141,17 +140,15 @@ void dijkstra(int start_node)
 	count++;
 		
 	}
-	for (int i=0;i<total_stations;i++)
-		cout<<station_names[predecessor[i]]<<endl;
 }
 void printPath(int end_node,int start_node)
 {
 	if(start_node == end_node)
-		cout<<end_node;
-	else if(predecessor[end_node] = -1)
+		cout<<station_names[end_node];
+	else if(predecessor[end_node] == -1)
 		cout<< "No path exists";
 	else
-		printPath(end_node,start_node);
+		printPath(predecessor[end_node],start_node);
 		cout<<station_names[end_node]<<"->";
 }
 
