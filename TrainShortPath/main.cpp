@@ -32,7 +32,7 @@ string elines[total_stations][max_change];
 int weights[total_stations][max_change];
 bool visited[total_stations];
 int length[total_stations];
-int predecessor[total_stations];
+int predecessor_s[total_stations];
 
 void initialize()
 {
@@ -88,9 +88,17 @@ void initialize()
 					edge_matrix[i][j] = weights[j][x];
 				}
 			}
-			if(edge_matrix[i][j] == 0)
-				edge_matrix[i][j] = bigint;
+			//if(edge_matrix[i][j] == 0)
+			//	edge_matrix[i][j] = bigint;
 		}
+	}
+	for (int i=0;i<total_stations;i++)
+	{
+		for (int j=0;j<total_stations;j++)
+		{
+			cout<<edge_matrix[i][j]<<"\t";
+		}
+		cout<<endl;
 	}
 }
 
@@ -119,11 +127,12 @@ void dijkstra(int start_node)
 	{
 		visited[i] = false;
 		length[i] = bigint;
-		predecessor[i] = -1;
+		predecessor_s[i] = -1;
 	}
 
 	length[start_node] = 0;
-	while(count<total_stations) {
+	while(count<total_stations) 
+	{
 		int closeunmark = getunmarked();
 		visited[closeunmark] = true;
 		for(int i=0;i<total_stations;i++) 
@@ -133,23 +142,38 @@ void dijkstra(int start_node)
 				if(length[i] > (length[closeunmark] + edge_matrix[closeunmark][i])) 
 				{
 					length[i] = length[closeunmark] + edge_matrix[closeunmark][i];
-					predecessor[i] = closeunmark;
+					predecessor_s[i] = closeunmark;
 				}
 			}
 		}
 	count++;
-		
 	}
 }
-void printPath(int end_node,int start_node)
+
+void printPath(int end_node,int start_node,int time)
 {
-	if(start_node == end_node)
-		cout<<station_names[end_node];
-	else if(predecessor[end_node] == -1)
+	if(start_node == end_node){
+		cout<<"Total time: "<<time<<endl;
+		cout<<station_names[end_node]<<"->";
+	}
+	else if(predecessor_s[end_node] == -1)
 		cout<< "No path exists";
 	else
-		printPath(predecessor[end_node],start_node);
+	{
+		time = time + edge_matrix[predecessor_s[end_node]][end_node];
+		printPath(predecessor_s[end_node],start_node,time);
 		cout<<station_names[end_node]<<"->";
+	}
+/*	for (int i=0;i<end_node;i++)
+	{
+		if(predecessor_s[i] == -1)
+			cout<<"Done";
+		else if (i==0)
+			cout<<"From "<<station_names[start_node]<<" take line "<<station_line[predecessor_s[start_node]]<<" to station "<<station_names[total_stations - predecessor_s[i]]<<endl;
+		else
+			cout<<"Then change to line "<<station_line[predecessor_s[i]]<<" and continue to "<<station_names[predecessor_s[i]]<<endl;
+	}*/
+	
 }
 
 int main()
@@ -162,10 +186,10 @@ int main()
 	int start_node;
 	int end_node;
 	cout << "Enter the name of the starting station: ";
-	//cin >> start_station;
+	//getline(cin,start_station);
 	start_station = "Homebush";
 	cout << "Enter the name of the ending station: ";
-	//cin >> end_station;
+	//getline(cin,end_station);
 	end_station = "Ashfield";
 	
 	bool start_exists = false;
@@ -189,7 +213,8 @@ int main()
 		{
 			cout<<"Stations found. Begining algorithim"<<endl;
 			dijkstra(start_node);
-			printPath(end_node,start_node);
+			printPath(end_node,start_node,0);
+			cin.get();
 		}
 		else
 		{
@@ -202,15 +227,5 @@ int main()
 		cout<<"End station not found. Terminating"<<endl;
 		exit(1);
 	}
-
-/*	INT_MAX is a big number.
-	for (int i=0;i<total_stations;i++)
-	{
-		for (int j=0;j<total_stations;j++)
-		{
-			cout<<edge_matrix[i][j]<<" ";
-		}
-		cout<<endl;
-	}*/
 	return 0;
 }
