@@ -156,8 +156,6 @@ void printPath(int end_node,int start_node,int time)
 		cout<<"Total time: "<<time<<endl;
 		cout<<"Starting at "<<station_names[end_node]<<" take line "<<station_line[start_node]<<endl;
 	}
-	else if(predecessor_s[end_node] == -1)
-		cout<< "No path exists";
 	else
 	{
 		time = time + edge_matrix[predecessor_s[end_node]][end_node];
@@ -185,9 +183,10 @@ int main()
 	string end_station;
 	int start_node;
 	int end_node;
+	int choice;
 	cout << "Enter the name of the starting station: ";
 	//getline(cin,start_station);
-	start_station = "Homebush";
+	start_station = "Summer Hill";
 	cout << "Enter the name of the ending station: ";
 	//getline(cin,end_station);
 	end_station = "Ashfield";
@@ -198,13 +197,39 @@ int main()
 	{
 		if(start_station == station_names[i])
 		{
-			start_exists = true;
-			start_node = i;
+			choice = 0;
+			if(start_exists == true)
+			{
+				cout<<"Please choose a line. 1 for Inner West Line, 2 for South Line:";
+				cin>>choice;
+				if(choice == 2)
+				{
+					start_node = i;
+				}
+			}
+			else
+			{
+				start_exists = true;
+				start_node = i;
+			}
 		}
 		else if(end_station == station_names[i])
 		{
-			end_exists = true;
-			end_node = i;
+			choice = 0;
+			if(end_exists == true)
+			{
+				cout<<"Please choose a line. 1 for Inner West Line, 2 for South Line:";
+				cin>>choice;
+				if(choice == 2)
+				{
+					end_node = i;
+				}
+			}
+			else
+			{
+				end_exists = true;
+				end_node = i;
+			}
 		}
 	}
 	if(start_exists)
