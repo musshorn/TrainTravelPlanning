@@ -54,7 +54,7 @@ void initialize()
 
 			TiXmlNode *edges = node->FirstChild("StationEdges");
 			int j =0;
-			for(TiXmlNode* edge = edges->FirstChild(); edge; edge = edge->NextSibling() )
+			for(TiXmlNode* edge = edges->FirstChild("StationEdge"); edge; edge = edge->NextSibling() )
 			{
 				TiXmlNode *ename = edge->FirstChild("Name")->FirstChild();
 				enames[i][j] = ename->Value();
@@ -64,17 +64,16 @@ void initialize()
 
 				TiXmlNode *duration = edge->FirstChild("Duration")->FirstChild();
 				weights[i][j] = atoi(duration->Value());
-				//cout<<ename->Value()<<endl;
 				j++;
 			}	
 			i++;
 		}
 
 	}
-	for (int i=0;i<total_stations;i++)
+/*	for (int i=0;i<total_stations;i++)
 	{
 		cout << station_names[i]<<endl;
-	}
+	}*/
 	//Create adjacency matrix, prepare it for dijkstra's algorithm
 	for (int i=0;i<total_stations;i++)
 	{
@@ -85,14 +84,14 @@ void initialize()
 			{
 				if	(station_names[j] == enames[i][x] && station_line[j] == elines[i][x])
 				{
-					edge_matrix[i][j] = weights[j][x];
+					edge_matrix[i][j] = weights[i][x];
 				}
 			}
-			//if(edge_matrix[i][j] == 0)
-			//	edge_matrix[i][j] = bigint;
+			if(edge_matrix[i][j] == 0)
+				edge_matrix[i][j] = bigint;
 		}
 	}
-	for (int i=0;i<total_stations;i++)
+/*	for (int i=0;i<total_stations;i++)
 	{
 		for (int j=0;j<total_stations;j++)
 		{
@@ -100,6 +99,7 @@ void initialize()
 		}
 		cout<<endl;
 	}
+	*/
 }
 
 int getunmarked()
@@ -154,7 +154,7 @@ void printPath(int end_node,int start_node,int time)
 {
 	if(start_node == end_node){
 		cout<<"Total time: "<<time<<endl;
-		cout<<station_names[end_node]<<"->";
+		cout<<"Starting at "<<station_names[end_node]<<" take line "<<station_line[start_node]<<endl;
 	}
 	else if(predecessor_s[end_node] == -1)
 		cout<< "No path exists";
@@ -162,7 +162,7 @@ void printPath(int end_node,int start_node,int time)
 	{
 		time = time + edge_matrix[predecessor_s[end_node]][end_node];
 		printPath(predecessor_s[end_node],start_node,time);
-		cout<<station_names[end_node]<<"->";
+		cout<<"Then take line "<<station_line[predecessor_s[end_node]]<<" to "<<station_names[end_node]<<endl;
 	}
 /*	for (int i=0;i<end_node;i++)
 	{
