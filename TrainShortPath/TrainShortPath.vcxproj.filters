@@ -36,6 +36,12 @@
     <ClCompile Include="..\..\..\..\..\Downloads\tinyxml_2_6_2\tinyxml\tinyxmlerror.cpp">
       <Filter>Source Files\xml</Filter>
     </ClCompile>
+    <ClCompile Include="Station.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Edges.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\Downloads\tinyxml_2_6_2\tinyxml\tinystr.h">
@@ -43,6 +49,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\Downloads\tinyxml_2_6_2\tinyxml\tinyxml.h">
       <Filter>Source Files\xml</Filter>
+    </ClInclude>
+    <ClInclude Include="station.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Edges.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

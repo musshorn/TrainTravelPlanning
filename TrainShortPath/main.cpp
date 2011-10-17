@@ -1,6 +1,15 @@
+/* c3109810	Liam Sanders
+
+Shortest path between 2 stations using Dijkstras algorithim.
+
+*/
+
+//Needed includes for input/output and string parsing
 #include <iostream>
 #include <string>
+#include <vector>
 
+//TinyXML requirements, note that this is not my code.
 #ifdef TIXMLUSESTL
 #include <iostream>
 #include <sstream>
@@ -17,63 +26,95 @@ CrtMemState endMemState;
 
 #include "xml\tinyxml.h"
 
+class StationEdge
+{
+	string Name;
+	string Line;
+	int Duration;
+	public:
+		void set_edge(string sname,string sline,int dur)
+		{
+			Name = sname;
+			Line = sline;
+			Duration = dur;
+		}
+};
+class Station
+{
+
+	public:
+		void set_station(string sname,string sline,vector<StationEdge> vedges)
+		{
+			Name = sname;
+			Line = sline;
+			StationEdges = vedges;
+		}
+};
+
 using namespace std;
 
+//The total number of stations, 
+//The most changes that occur at any one station (ie the most edges to any one vertex)
+//A large int, large enough such that any edge has a weight less than it.
 static const int total_stations = 11;
 static const int max_change = 3;
 static const int bigint = 9001;
 
+string enames;
+string elines;
+
+//we will be using an adjacency matrix to denote the graph.
 int edge_matrix[total_stations][total_stations];
-int vertex[total_stations];
-string station_names[total_stations];
-string station_line[total_stations];
-string enames[total_stations][max_change];
-string elines[total_stations][max_change];
+
+//These store the names of the stations, which line that station is on and the names and lines of each station connecting to it
+vector<Station> stations;
+
+//used to convert the XML input to the adjacency matrix
 int weights[total_stations][max_change];
-bool visited[total_stations];
-int length[total_stations];
+
+//stores closest predecessor to the node.
 int predecessor_s[total_stations];
+
 
 void initialize()
 {
-		//Load XML into memory
+	//Load XML into memory (taken and modified from xmltest.cpp)
 	TiXmlDocument doc("RailNetwork.xml");
 	if (doc.LoadFile()){
 		
 		TiXmlNode* root;
 		root = doc.RootElement();
 
-		int i=0;
 		for(TiXmlNode* node = root->FirstChild(); node; node = node->NextSibling() )
 		{
+			vector<StationEdge> tempedges;
 			TiXmlNode *name = node->FirstChild("Name")->FirstChild();
-			station_names[i] = name->Value();
+			//station_names.push_back(name->Value());
 
 			TiXmlNode *line = node->FirstChild("Line")->FirstChild();
-			station_line[i] = line->Value();
+			//station_line.push_back(line->Value());
 
 			TiXmlNode *edges = node->FirstChild("StationEdges");
-			int j =0;
+
 			for(TiXmlNode* edge = edges->FirstChild("StationEdge"); edge; edge = edge->NextSibling() )
 			{
 				TiXmlNode *ename = edge->FirstChild("Name")->FirstChild();
-				enames[i][j] = ename->Value();
+				//enames[i][j] = ename->Value();
 
 				TiXmlNode *eline = edge->FirstChild("Line")->FirstChild();
-				elines[i][j] = eline->Value();
+				//elines[i][j] = eline->Value();
 
 				TiXmlNode *duration = edge->FirstChild("Duration")->FirstChild();
-				weights[i][j] = atoi(duration->Value());
-				j++;
+				//weights[i][j] = atoi(duration->Value());
+				tempedges.push_back(
 			}	
-			i++;
+
 		}
 
+
 	}
-/*	for (int i=0;i<total_stations;i++)
-	{
-		cout << station_names[i]<<endl;
-	}*/
+	//From here on all code was written by me.
+
 	//Create adjacency matrix, prepare it for dijkstra's algorithm
 	for (int i=0;i<total_stations;i++)
 	{
@@ -88,53 +129,49 @@ void initialize()
 				}
 			}
 			if(edge_matrix[i][j] == 0)
-				edge_matrix[i][j] = bigint;
+				edge_matrix[i][j] = bigint; //we need what would be 0 weights to have a "big" weight so the algorithim doesnt use them.
 		}
 	}
-/*	for (int i=0;i<total_stations;i++)
-	{
-		for (int j=0;j<total_stations;j++)
-		{
-			cout<<edge_matrix[i][j]<<"\t";
-		}
-		cout<<endl;
-	}
-	*/
 }
 
-int getunmarked()
-{
-	int smalllength = bigint;
-	int closeunmark;
-
-	for (int i = 0; i<total_stations; i++)
-	{
-		if(!visited[i] && smalllength >= length[i])
-		{
-			smalllength = length[i];
-			closeunmark = i;
-		}
-	}
-	
-	return closeunmark;
-}
-
+//dijkstras algorithim specifying the starting node.
 void dijkstra(int start_node)
 {
+	int length[total_stations];
+	bool visited[total_stations];
 	int count=0;
 
+	//Initialize all stations to not visited, and the shortest distance to each station is the maximum distance
 	for (int i=0;i<total_stations;i++)
 	{
 		visited[i] = false;
 		length[i] = bigint;
 		predecessor_s[i] = -1;
 	}
-
+	
+	//the distance from the starting node to itself is 0.
 	length[start_node] = 0;
+
 	while(count<total_stations) 
 	{
-		int closeunmark = getunmarked();
+		//We will now find the closest unmarked node to the source
+		int closeunmark;
+		int smalllength = bigint;
+
+		//Loop through the nodes to find the closest
+		for (int i = 0; i<total_stations; i++)
+		{
+			if(!visited[i] && smalllength >= length[i])
+			{
+				smalllength = length[i];
+				closeunmark = i;
+			}
+		}
+
+		// we now consider that node visited
 		visited[closeunmark] = true;
+
+		//Find the shortest distance from this node to every other node, take a "step" in that direction. Mark this node as a predecessor
 		for(int i=0;i<total_stations;i++) 
 		{
 			if(!visited[i] && edge_matrix[closeunmark][i]) 
@@ -145,11 +182,13 @@ void dijkstra(int start_node)
 					predecessor_s[i] = closeunmark;
 				}
 			}
-		}
+		}// traverse all stations
 	count++;
 	}
 }
 
+//Print the route required to travel recursivly
+//Note. When changing stations it lists the same station and the same line 2x.
 void printPath(int end_node,int start_node,int time)
 {
 	if(start_node == end_node){
@@ -162,20 +201,13 @@ void printPath(int end_node,int start_node,int time)
 		printPath(predecessor_s[end_node],start_node,time);
 		cout<<"Then take line "<<station_line[predecessor_s[end_node]]<<" to "<<station_names[end_node]<<endl;
 	}
-/*	for (int i=0;i<end_node;i++)
-	{
-		if(predecessor_s[i] == -1)
-			cout<<"Done";
-		else if (i==0)
-			cout<<"From "<<station_names[start_node]<<" take line "<<station_line[predecessor_s[start_node]]<<" to station "<<station_names[total_stations - predecessor_s[i]]<<endl;
-		else
-			cout<<"Then change to line "<<station_line[predecessor_s[i]]<<" and continue to "<<station_names[predecessor_s[i]]<<endl;
-	}*/
 	
 }
 
+//Main function
 int main()
 {
+	//read xml, setup arrays
 	initialize();
 
 	//Get user data, Validate.
@@ -184,12 +216,13 @@ int main()
 	int start_node;
 	int end_node;
 	int choice;
+
 	cout << "Enter the name of the starting station: ";
-	//getline(cin,start_station);
-	start_station = "Summer Hill";
+	getline(cin,start_station);
+	//start_station = "Summer Hill";
 	cout << "Enter the name of the ending station: ";
-	//getline(cin,end_station);
-	end_station = "Ashfield";
+	getline(cin,end_station);
+	//end_station = "Homebush";
 	
 	bool start_exists = false;
 	bool end_exists = false;
@@ -198,6 +231,8 @@ int main()
 		if(start_station == station_names[i])
 		{
 			choice = 0;
+			
+			//If the user wishes to specify which line they travel on
 			if(start_exists == true)
 			{
 				cout<<"Please choose a line. 1 for Inner West Line, 2 for South Line:";
