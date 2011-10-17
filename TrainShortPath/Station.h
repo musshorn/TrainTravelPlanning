@@ -7,11 +7,11 @@
 class Station
 {
 	public:
-		Station(string name, string line, std::vector<Edges> edge);
+		Station(std::string name, std::string line, std::vector<Edges> edge);
 		~Station(void);
 	private:
-		string Name;
-		string Line;
+		std::string Name;
+		std::string Line;
 		std::vector<Edges> Edge;
 };
 #endif

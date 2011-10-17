@@ -8,6 +8,8 @@ Shortest path between 2 stations using Dijkstras algorithim.
 #include <iostream>
 #include <string>
 #include <vector>
+#include "Station.h"
+#include "Edges.h"
 
 //TinyXML requirements, note that this is not my code.
 #ifdef TIXMLUSESTL
@@ -25,32 +27,6 @@ CrtMemState endMemState;
 #endif
 
 #include "xml\tinyxml.h"
-
-class StationEdge
-{
-	string Name;
-	string Line;
-	int Duration;
-	public:
-		void set_edge(string sname,string sline,int dur)
-		{
-			Name = sname;
-			Line = sline;
-			Duration = dur;
-		}
-};
-class Station
-{
-
-	public:
-		void set_station(string sname,string sline,vector<StationEdge> vedges)
-		{
-			Name = sname;
-			Line = sline;
-			StationEdges = vedges;
-		}
-};
-
 using namespace std;
 
 //The total number of stations, 
@@ -87,7 +63,7 @@ void initialize()
 
 		for(TiXmlNode* node = root->FirstChild(); node; node = node->NextSibling() )
 		{
-			vector<StationEdge> tempedges;
+			vector<Edges> tempedges;
 			TiXmlNode *name = node->FirstChild("Name")->FirstChild();
 			//station_names.push_back(name->Value());
 
@@ -106,9 +82,9 @@ void initialize()
 
 				TiXmlNode *duration = edge->FirstChild("Duration")->FirstChild();
 				//weights[i][j] = atoi(duration->Value());
-				tempedges.push_back(
+				
 			}	
-
+			stations.push_back(
 		}
 
 
