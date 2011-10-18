@@ -8,6 +8,7 @@ Shortest path between 2 stations using Dijkstras algorithim.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
 #include "Station.h"
 #include "Edges.h"
 
@@ -29,28 +30,34 @@ CrtMemState endMemState;
 #include "xml\tinyxml.h"
 using namespace std;
 
-//The total number of stations, 
-//The most changes that occur at any one station (ie the most edges to any one vertex)
-//A large int, large enough such that any edge has a weight less than it.
-static const int total_stations = 11;
-static const int max_change = 3;
-static const int bigint = 9001;
-
 string enames;
 string elines;
 
 //we will be using an adjacency matrix to denote the graph.
-int edge_matrix[total_stations][total_stations];
+//int edge_matrix[total_stations][total_stations];
+static const int bigint = 9001;
 
 //These store the names of the stations, which line that station is on and the names and lines of each station connecting to it
 vector<Station> stations;
-
+vector<int> distanceFromStart;
+vector<int> predecessor;
 //used to convert the XML input to the adjacency matrix
-int weights[total_stations][max_change];
+//int weights[total_stations][max_change];
 
-//stores closest predecessor to the node.
-int predecessor_s[total_stations];
-
+class Node
+{
+public:
+	int node;
+	int distance;
+};
+bool operator< (const Node& patha,const Node &pathb)
+{
+	return patha.distance > pathb.distance;
+}
+bool operator> (const Node& patha,const Node &pathb)
+{
+	return patha.distance < pathb.distance;
+}
 
 void initialize()
 {
@@ -83,88 +90,66 @@ void initialize()
 				TiXmlNode *duration = edge->FirstChild("Duration")->FirstChild();
 				//weights[i][j] = atoi(duration->Value());
 				
+				tempedges.push_back(Edges(ename->Value(),eline->Value(),atoi(duration->Value())));
 			}	
-			stations.push_back(
+			stations.push_back(Station(name->Value(),line->Value(),tempedges));
 		}
 
 
 	}
 	//From here on all code was written by me.
-
-	//Create adjacency matrix, prepare it for dijkstra's algorithm
-	for (int i=0;i<total_stations;i++)
-	{
-		for (int j=0;j<total_stations;j++)
-		{
-
-			for (int x=0;x<max_change;x++)
-			{
-				if	(station_names[j] == enames[i][x] && station_line[j] == elines[i][x])
-				{
-					edge_matrix[i][j] = weights[i][x];
-				}
-			}
-			if(edge_matrix[i][j] == 0)
-				edge_matrix[i][j] = bigint; //we need what would be 0 weights to have a "big" weight so the algorithim doesnt use them.
-		}
-	}
 }
 
 //dijkstras algorithim specifying the starting node.
 void dijkstra(int start_node)
 {
-	int length[total_stations];
-	bool visited[total_stations];
-	int count=0;
+	priority_queue<Node> dijpath;
+	Node start;
+	start.distance = 0;
+	start.node = start_node;
 
 	//Initialize all stations to not visited, and the shortest distance to each station is the maximum distance
-	for (int i=0;i<total_stations;i++)
-	{
-		visited[i] = false;
-		length[i] = bigint;
-		predecessor_s[i] = -1;
-	}
+	dijpath.push(start);
 	
-	//the distance from the starting node to itself is 0.
-	length[start_node] = 0;
-
-	while(count<total_stations) 
+	for (int i=0;i<stations.size();i++)
 	{
-		//We will now find the closest unmarked node to the source
-		int closeunmark;
-		int smalllength = bigint;
+		distanceFromStart.push_back(bigint);
+		predecessor.push_back(0);
+	}
 
-		//Loop through the nodes to find the closest
-		for (int i = 0; i<total_stations; i++)
+	//the distance from the starting node to itself is 0.
+	distanceFromStart.at(start_node) = 0;
+	predecessor.at(start_node) = -1;
+
+	while(!dijpath.empty())
+	{
+		Node current = dijpath.top();
+		dijpath.pop();
+		if (current.distance > distanceFromStart.at(current.node))
 		{
-			if(!visited[i] && smalllength >= length[i])
+			continue;
+		}
+		for(int i=0; i < stations.at(current.node).getEdgeCount(); i++) // go though all the connected edges
+		{
+			cout <<distanceFromStart.at(current.node)<<" "<<stations.at(current.node).getEdgeWeight(i)<<" "<<distanceFromStart.at(i);
+
+			if(distanceFromStart.at(current.node) + stations.at(current.node).getEdgeWeight(i) < distanceFromStart.at(i)) //dijkstra cond
 			{
-				smalllength = length[i];
-				closeunmark = i;
+				distanceFromStart.at(current.node) = distanceFromStart.at(current.node) + stations.at(current.node).getEdgeWeight(i);
+				predecessor.at(current.node) = current.node;
+				Node newNode;
+				newNode.distance = distanceFromStart.at(current.node);
+				newNode.node = current.node;
+				dijpath.push(newNode);
 			}
 		}
-
-		// we now consider that node visited
-		visited[closeunmark] = true;
-
-		//Find the shortest distance from this node to every other node, take a "step" in that direction. Mark this node as a predecessor
-		for(int i=0;i<total_stations;i++) 
-		{
-			if(!visited[i] && edge_matrix[closeunmark][i]) 
-			{
-				if(length[i] > (length[closeunmark] + edge_matrix[closeunmark][i])) 
-				{
-					length[i] = length[closeunmark] + edge_matrix[closeunmark][i];
-					predecessor_s[i] = closeunmark;
-				}
-			}
-		}// traverse all stations
-	count++;
 	}
 }
 
+
 //Print the route required to travel recursivly
 //Note. When changing stations it lists the same station and the same line 2x.
+/*
 void printPath(int end_node,int start_node,int time)
 {
 	if(start_node == end_node){
@@ -178,7 +163,7 @@ void printPath(int end_node,int start_node,int time)
 		cout<<"Then take line "<<station_line[predecessor_s[end_node]]<<" to "<<station_names[end_node]<<endl;
 	}
 	
-}
+}*/
 
 //Main function
 int main()
@@ -191,56 +176,27 @@ int main()
 	string end_station;
 	int start_node;
 	int end_node;
-	int choice;
 
 	cout << "Enter the name of the starting station: ";
-	getline(cin,start_station);
-	//start_station = "Summer Hill";
+	//getline(cin,start_station);
+	start_station = "Summer Hill";
 	cout << "Enter the name of the ending station: ";
-	getline(cin,end_station);
-	//end_station = "Homebush";
+	//getline(cin,end_station);
+	end_station = "Homebush";
 	
 	bool start_exists = false;
 	bool end_exists = false;
-	for (int i=0;i<total_stations;i++)
+	for (int i=0;i<stations.size();i++)
 	{
-		if(start_station == station_names[i])
+		if(start_station == stations.at(i).getName())
 		{
-			choice = 0;
-			
-			//If the user wishes to specify which line they travel on
-			if(start_exists == true)
-			{
-				cout<<"Please choose a line. 1 for Inner West Line, 2 for South Line:";
-				cin>>choice;
-				if(choice == 2)
-				{
-					start_node = i;
-				}
-			}
-			else
-			{
-				start_exists = true;
-				start_node = i;
-			}
+			start_node = i;
+			start_exists = true;
 		}
-		else if(end_station == station_names[i])
+		else if(end_station == stations.at(i).getName())
 		{
-			choice = 0;
-			if(end_exists == true)
-			{
-				cout<<"Please choose a line. 1 for Inner West Line, 2 for South Line:";
-				cin>>choice;
-				if(choice == 2)
-				{
-					end_node = i;
-				}
-			}
-			else
-			{
-				end_exists = true;
-				end_node = i;
-			}
+			end_exists = true;
+			end_node = i;
 		}
 	}
 	if(start_exists)
@@ -249,7 +205,7 @@ int main()
 		{
 			cout<<"Stations found. Begining algorithim"<<endl;
 			dijkstra(start_node);
-			printPath(end_node,start_node,0);
+			//printPath(end_node,start_node,0);
 			cin.get();
 		}
 		else

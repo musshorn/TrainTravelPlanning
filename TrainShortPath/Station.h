@@ -8,7 +8,9 @@ class Station
 {
 	public:
 		Station(std::string name, std::string line, std::vector<Edges> edge);
-		~Station(void);
+		std::string getName();
+		int getEdgeCount();
+		int getEdgeWeight(int id);
 	private:
 		std::string Name;
 		std::string Line;

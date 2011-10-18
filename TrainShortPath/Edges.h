@@ -7,10 +7,12 @@ class Edges
 {
 	public:
 		Edges(std::string ename, std::string eline, int eduration);
-		~Edges(void);
+		int getDuration();
+		std::string getName();
+		std::string getLine();
 	private:
-		string Name;
-		string Line;
+		std::string Name;
+		std::string Line;
 		int Duration;
 };
 #endif
