@@ -10,6 +10,8 @@ class Station
 		Station(std::string name, std::string line, std::vector<Edges> edge);
 		std::string getName();
 		std::string getLine();
+		std::string Station::getEdgeName(int id);
+		std::string Station::getEdgeLine(int id);
 		int getEdgeCount();
 		int getEdgeWeight(int id);
 		std::vector<Edges> getEdges();

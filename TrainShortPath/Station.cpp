@@ -24,6 +24,14 @@ int Station::getEdgeWeight(int id)
 {
 	return Edge.at(id).getDuration();
 }
+std::string Station::getEdgeName(int id)
+{
+	return Edge.at(id).getName();
+}
+std::string Station::getEdgeLine(int id)
+{
+	return Edge.at(id).getLine();
+}
 std::vector<Edges> Station::getEdges() 
 {
 	return Edge;
