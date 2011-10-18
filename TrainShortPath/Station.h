@@ -9,8 +9,10 @@ class Station
 	public:
 		Station(std::string name, std::string line, std::vector<Edges> edge);
 		std::string getName();
+		std::string getLine();
 		int getEdgeCount();
 		int getEdgeWeight(int id);
+		std::vector<Edges> getEdges();
 	private:
 		std::string Name;
 		std::string Line;

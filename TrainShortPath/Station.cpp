@@ -12,6 +12,10 @@ std::string Station::getName()
 {
 	return Name;
 }
+std::string Station::getLine()
+{
+	return Line;
+}
 int Station::getEdgeCount()
 {
 	return Edge.size();
@@ -19,4 +23,8 @@ int Station::getEdgeCount()
 int Station::getEdgeWeight(int id)
 {
 	return Edge.at(id).getDuration();
+}
+std::vector<Edges> Station::getEdges() 
+{
+	return Edge;
 }

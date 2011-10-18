@@ -27,7 +27,9 @@ CrtMemState startMemState;
 CrtMemState endMemState;
 #endif
 
-#include "xml\tinyxml.h"
+#include "xml/tinyxml.h"
+//end
+
 using namespace std;
 
 string enames;
@@ -40,7 +42,7 @@ static const int bigint = 9001;
 //These store the names of the stations, which line that station is on and the names and lines of each station connecting to it
 vector<Station> stations;
 vector<int> distanceFromStart;
-vector<int> predecessor;
+
 //used to convert the XML input to the adjacency matrix
 //int weights[total_stations][max_change];
 
@@ -50,13 +52,13 @@ public:
 	int node;
 	int distance;
 };
-bool operator< (const Node& patha,const Node &pathb)
-{
-	return patha.distance > pathb.distance;
-}
 bool operator> (const Node& patha,const Node &pathb)
 {
 	return patha.distance < pathb.distance;
+}
+bool operator< (const Node& patha,const Node &pathb)
+{
+	return patha.distance > pathb.distance;
 }
 
 void initialize()
@@ -104,7 +106,10 @@ void initialize()
 void dijkstra(int start_node)
 {
 	priority_queue<Node> dijpath;
+	vector<int> predecessor;
+	
 	Node start;
+
 	start.distance = 0;
 	start.node = start_node;
 
@@ -114,33 +119,48 @@ void dijkstra(int start_node)
 	for (int i=0;i<stations.size();i++)
 	{
 		distanceFromStart.push_back(bigint);
-		predecessor.push_back(0);
+		predecessor.push_back(-1);
 	}
 
 	//the distance from the starting node to itself is 0.
 	distanceFromStart.at(start_node) = 0;
-	predecessor.at(start_node) = -1;
 
 	while(!dijpath.empty())
 	{
+		int nextdist = bigint;
 		Node current = dijpath.top();
-		dijpath.pop();
-		if (current.distance > distanceFromStart.at(current.node))
+		if(current.distance >distanceFromStart.at(current.node))
 		{
 			continue;
 		}
+
+		dijpath.pop();
+
+
 		for(int i=0; i < stations.at(current.node).getEdgeCount(); i++) // go though all the connected edges
 		{
-			cout <<distanceFromStart.at(current.node)<<" "<<stations.at(current.node).getEdgeWeight(i)<<" "<<distanceFromStart.at(i);
+		for (int j = 0;j<stations.size();j++)
+		{
+			if(stations.at(current.node).getName() == stations.at(j).getName() && stations.at(current.node).getLine() == stations.at(j).getLine())
+				cout<<j;
 
-			if(distanceFromStart.at(current.node) + stations.at(current.node).getEdgeWeight(i) < distanceFromStart.at(i)) //dijkstra cond
+		}
+			cout <<distanceFromStart.at(current.node)<<" "<<stations.at(current.node).getEdgeWeight(i)<<" "<<distanceFromStart.at(i);
+			if(distanceFromStart.at(i)>distanceFromStart.at(current.node)+stations.at(current.node).getEdgeWeight(i))
 			{
-				distanceFromStart.at(current.node) = distanceFromStart.at(current.node) + stations.at(current.node).getEdgeWeight(i);
-				predecessor.at(current.node) = current.node;
-				Node newNode;
-				newNode.distance = distanceFromStart.at(current.node);
-				newNode.node = current.node;
-				dijpath.push(newNode);
+				for (int j = 0;j<stations.size();j++)
+				{
+					if(stations.at(i).getName() == stations.at(j).getName() && stations.at(i).getLine() == stations.at(j).getLine())
+					{
+						distanceFromStart.at(current.node) = distanceFromStart.at(current.node) + stations.at(current.node).getEdgeWeight(i);
+
+						Node newNode;
+						newNode.distance = distanceFromStart.at(current.node);
+						predecessor.at(current.node) = j;
+						newNode.node = j;
+						dijpath.push(newNode);
+					}
+				}
 			}
 		}
 	}
