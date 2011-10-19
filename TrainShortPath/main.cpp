@@ -129,38 +129,42 @@ void dijkstra(int start_node)
 	{
 		int nextdist = bigint;
 		Node current = dijpath.top();
-		if(current.distance >distanceFromStart.at(current.node))
+		
+		if(current.distance  == bigint)
 		{
 			continue;
 		}
-
 		dijpath.pop();
+		
+		int currshort = bigint;
+		int shortdex;
+		int closest;
 
+		for (int j = 0;j<stations.at(current.node).getEdgeCount();j++)
+		{
+			if(stations.at(current.node).getEdgeWeight(j) < currshort);
+				shortdex = j;
+		}
+		for (int j = 0;j<stations.size();j++)
+		{
+			if(stations.at(j).getName() == stations.at(current.node).getEdgeName(shortdex) && stations.at(j).getLine() == stations.at(current.node).getEdgeLine(shortdex))
+				closest = j;
+		}
 
 		for(int i=0; i < stations.at(current.node).getEdgeCount(); i++) // go though all the connected edges
 		{
-		for (int j = 0;j<stations.size();j++)
-		{
-			if(stations.at(current.node).getName() == stations.at(j).getName() && stations.at(current.node).getLine() == stations.at(j).getLine())
-				cout<<j;
 
-		}
-			cout <<distanceFromStart.at(current.node)<<" "<<stations.at(current.node).getEdgeWeight(i)<<" "<<distanceFromStart.at(i);
-			if(distanceFromStart.at(i)>distanceFromStart.at(current.node)+stations.at(current.node).getEdgeWeight(i))
+			int alt = distanceFromStart.at(closest) + stations.at(closest).getEdgeWeight(i);
+			cout<<alt<<" "<<distanceFromStart.at(i);
+			if(alt<distanceFromStart.at(i))
 			{
-				for (int j = 0;j<stations.size();j++)
-				{
-					if(stations.at(i).getName() == stations.at(j).getName() && stations.at(i).getLine() == stations.at(j).getLine())
-					{
-						distanceFromStart.at(current.node) = distanceFromStart.at(current.node) + stations.at(current.node).getEdgeWeight(i);
+				distanceFromStart.at(i) = alt;
+				predecessor.at(i) = closest;
 
-						Node newNode;
-						newNode.distance = distanceFromStart.at(current.node);
-						predecessor.at(current.node) = j;
-						newNode.node = j;
-						dijpath.push(newNode);
-					}
-				}
+				Node newNode;
+				newNode.distance = alt;
+				newNode.node = closest;
+				dijpath.push(newNode);
 			}
 		}
 	}
